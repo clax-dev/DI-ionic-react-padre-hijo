@@ -1,0 +1,122 @@
+/* ========== Tokens de Ionic (Shadow DOM se personaliza con variables) ========== */
+:root {
+  --ion-color-primary: #7c2d12;
+  --ion-color-primary-rgb: 124, 45, 18;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #6d280f;
+  --ion-color-primary-tint: #89422a;
+
+  --ion-background-color: #faf6f1;
+  --ion-text-color: #1c1917;
+  --ion-font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+
+  --cafe-borde: #e7ddd2;
+  --cafe-suave: #fff;
+  --azul: #1d4ed8;
+  --verde: #15803d;
+  --morado: #7e22ce;
+}
+
+.marca { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; }
+
+/* ========== Layout responsive (mobile-first) ========== */
+.contenedor { max-width: 1180px; margin: 0 auto; padding: 16px 12px 96px; }
+
+.intro h1 { font-size: 1.5rem; margin: 4px 0 6px; color: var(--ion-color-primary); }
+.intro p { margin: 0 0 16px; color: #44403c; line-height: 1.5; }
+
+.layout { display: grid; gap: 16px; grid-template-columns: 1fr; }
+.columna-lateral { display: grid; gap: 16px; align-content: start; }
+
+.rejilla-productos { display: grid; gap: 12px; grid-template-columns: 1fr; }
+
+@media (min-width: 576px) {
+  .rejilla-productos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 768px) {
+  .contenedor { padding: 24px 20px 48px; }
+  .intro h1 { font-size: 1.9rem; }
+  .rejilla-productos { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (min-width: 992px) {
+  .layout { grid-template-columns: minmax(0, 1fr) 380px; align-items: start; }
+  .rejilla-productos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .columna-lateral { position: sticky; top: 16px; }
+}
+@media (min-width: 1180px) {
+  .rejilla-productos { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* ========== SeccionPanel (children) ========== */
+.panel { background: var(--cafe-suave); border: 1px solid var(--cafe-borde); border-radius: 14px; padding: 14px; }
+.panel__header { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.panel__icono { font-size: 1.3rem; color: var(--ion-color-primary); }
+.panel__titulo { margin: 0; font-size: 1.1rem; font-weight: 700; }
+.panel__etiqueta {
+  margin-left: auto; font-size: 0.72rem; font-family: Consolas, monospace;
+  background: #f5f0ea; color: #57534e; padding: 2px 8px; border-radius: 999px;
+}
+
+/* ========== ProductoCard ========== */
+ion-card.producto {
+  margin: 0; border-radius: 12px; box-shadow: none; border: 2px solid var(--cafe-borde);
+  --background: #fffdfa; transition: border-color .15s ease, transform .15s ease;
+}
+ion-card.producto--activo { border-color: var(--ion-color-primary); }
+@media (hover: hover) { ion-card.producto:hover { transform: translateY(-2px); } }
+@media (prefers-reduced-motion: reduce) { ion-card.producto { transition: none; } ion-card.producto:hover { transform: none; } }
+
+.producto__contenido { padding: 12px; }
+.producto__cabecera { display: flex; justify-content: space-between; align-items: center; min-height: 24px; }
+.producto__badge { --background: var(--ion-color-primary); --color: #fff; font-size: .85rem; padding: 4px 8px; }
+/* Ionic fuerza 14px en los h3 dentro de ion-card-content: se sube la especificidad. */
+ion-card-content.producto__contenido .producto__nombre { margin: 8px 0 2px; font-size: 1.1rem; font-weight: 700; color: #1c1917; }
+.producto__precio { margin: 0 0 10px; font-size: 1rem; color: #57534e; }
+.producto__acciones { display: flex; gap: 8px; }
+.producto__acciones ion-button { margin: 0; min-height: 44px; }
+.btn-anadir { flex: 1; font-weight: 700; text-transform: none; }
+.btn-cantidad { --padding-start: 10px; --padding-end: 10px; }
+
+.categoria { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; padding: 3px 8px; border-radius: 6px; }
+.categoria--cafe { background: #fde7d7; color: #7c2d12; }
+.categoria--bolleria { background: #fef3c7; color: #78350f; }
+.categoria--bocadillo { background: #dcfce7; color: #14532d; }
+
+.btn-nuevo { margin: 14px 0 0; text-transform: none; font-weight: 700; }
+
+/* ========== ResumenPedido ========== */
+.resumen__vacio, .registro__vacio { color: #57534e; margin: 4px 0 10px; font-size: .95rem; }
+.resumen__lista { padding: 0; margin-bottom: 8px; }
+.resumen__total {
+  display: flex; justify-content: space-between; align-items: baseline; margin: 8px 0 12px;
+  padding-top: 8px; border-top: 2px dashed var(--cafe-borde); color: #44403c;
+}
+.resumen__total strong { font-size: 1.4rem; color: var(--ion-color-primary); }
+.resumen__acciones { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.resumen__acciones ion-button { margin: 0; min-height: 44px; text-transform: none; font-weight: 700; }
+
+/* ========== RegistroComunicacion ========== */
+.registro__leyenda { list-style: none; padding: 0; margin: 0 0 10px; display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: .78rem; color: #44403c; }
+.registro__leyenda li { display: inline-flex; align-items: center; gap: 6px; }
+.punto { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.punto.evento--baja { background: var(--azul); }
+.punto.evento--sube { background: var(--verde); }
+.punto.evento--hermano { background: var(--morado); }
+
+.registro__lista { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; max-height: 42vh; overflow-y: auto; }
+.evento { border-left: 4px solid; background: #fafaf9; border-radius: 6px; padding: 6px 8px; display: grid; gap: 2px; font-size: .82rem; }
+.evento.evento--baja { border-color: var(--azul); }
+.evento.evento--sube { border-color: var(--verde); }
+.evento.evento--hermano { border-color: var(--morado); }
+.evento__hora { color: #78716c; font-size: .72rem; }
+.evento__detalle { font-family: Consolas, monospace; font-size: .78rem; color: #292524; word-break: break-word; }
+
+/* ========== Formulario / modal ========== */
+.form-error { margin: 10px 4px 0; font-weight: 600; }
+@media (min-width: 768px) {
+  ion-modal.modal-formulario { --width: 480px; --height: min(440px, 85vh); --border-radius: 14px; }
+}
+
+/* Foco de teclado visible */
+:focus-visible { outline: 3px solid #f59e0b; outline-offset: 2px; }
