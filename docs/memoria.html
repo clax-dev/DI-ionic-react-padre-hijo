@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Memoria · Ionic React padre-hijo</title>
+<style>
+  @page { size: A4; margin: 15mm 15mm; }
+  * { box-sizing: border-box; }
+  body { font-family: "Segoe UI", system-ui, sans-serif; color: #1c1917; font-size: 10.3pt; line-height: 1.45; margin: 0; }
+  h1 { font-size: 21pt; margin: 0 0 4px; color: #7c2d12; }
+  h2 { break-after: avoid; font-size: 12.5pt; margin: 16px 0 6px; padding-bottom: 3px; border-bottom: 2px solid #fed7aa; color: #7c2d12; }
+  p { margin: 4px 0 8px; }
+  code { font-family: Consolas, monospace; font-size: 8.8pt; background: #f5f5f4; padding: 1px 4px; border-radius: 3px; }
+  pre { font-family: Consolas, monospace; font-size: 8.3pt; background: #fafaf9; border: 1px solid #e7e5e4; border-radius: 6px; padding: 8px 10px; margin: 6px 0; white-space: pre; break-inside: avoid; }
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 10px; font-size: 9.3pt; }
+  tr { break-inside: avoid; }
+  th, td { border: 1px solid #d6d3d1; padding: 5px 7px; text-align: left; vertical-align: top; }
+  th { background: #ffedd5; }
+  .meta { color: #57534e; margin-bottom: 12px; }
+  .box { border: 1px solid #fed7aa; background: #fff7ed; border-radius: 8px; padding: 8px 12px; margin: 8px 0; break-inside: avoid; }
+  .links td:first-child { width: 24%; font-weight: 600; }
+  .shots { break-inside: avoid; display: flex; gap: 10px; align-items: flex-start; justify-content: center; }
+  .shots figure { margin: 0; text-align: center; }
+  .shots img { border: 1px solid #d6d3d1; border-radius: 6px; display: block; }
+  figcaption { font-size: 8.3pt; color: #57534e; margin-top: 3px; }
+  .az { color: #1d4ed8; font-weight: 700; } .ve { color: #15803d; font-weight: 700; } .mo { color: #7e22ce; font-weight: 700; }
+  ul { margin: 4px 0 8px; padding-left: 18px; } li { margin: 2px 0; }
+</style>
+</head>
+<body>
+
+<h1>Cafetería DAM · Componentes padre e hijo en Ionic React</h1>
+<div class="meta">Desarrollo de Interfaces (0488) · 2.º DAM · Práctica: <strong>Ionic React con componente padre e hijo y su comunicación</strong></div>
+
+<table class="links">
+  <tr><td>Despliegue (Vercel)</td><td><a href="https://ionic-react-padre-hijo.vercel.app">https://ionic-react-padre-hijo.vercel.app</a></td></tr>
+  <tr><td>Repositorio</td><td><code>https://github.com/clax-dev/DI-ionic-react-padre-hijo</code></td></tr>
+  <tr><td>Stack</td><td>Ionic React 8 · React 18 · TypeScript estricto · Vite 5</td></tr>
+</table>
+
+<h2>1. Objetivo</h2>
+<p>Construir una app Ionic React en la que un <strong>componente padre</strong> se comunique con varios <strong>componentes hijos</strong> en ambos sentidos. El caso de uso es una cafetería: el cliente añade productos de la carta a su pedido, ve el total y puede añadir productos nuevos a la carta. Un panel de <em>registro de comunicación</em> muestra en pantalla cada mensaje que viaja entre componentes, para que el flujo de datos se vea al usar la app.</p>
+
+<h2>2. Árbol de componentes</h2>
+<pre>Home (PADRE · estado: productos, pedido, eventos, modalAbierto, toast)
+ ├─ SeccionPanel            props ↓ titulo, icono, etiqueta + children
+ ├─ ProductoCard ×N         props ↓ producto, cantidad        callbacks ↑ onAnadir, onQuitar
+ ├─ ResumenPedido           props ↓ lineas, total             callbacks ↑ onVaciar, onConfirmar
+ ├─ FormularioProducto      props ↓ abierto · estado local    callbacks ↑ onCrear(datos), onCerrar
+ └─ RegistroComunicacion    props ↓ eventos                   callback  ↑ onLimpiar
+types/pedido.ts → contrato tipado que comparten padre e hijos</pre>
+
+<h2>3. Formas de comunicación</h2>
+<table>
+  <tr><th>Patrón</th><th>Dirección</th><th>Cómo funciona en el código</th></tr>
+  <tr><td><strong>Props</strong></td><td><span class="az">padre → hijo</span></td><td><code>&lt;ProductoCard producto={p} cantidad={pedido[p.id] ?? 0} … /&gt;</code>. El hijo pinta lo que recibe; la insignia «×2» la decide el padre.</td></tr>
+  <tr><td><strong>Callbacks</strong></td><td><span class="ve">hijo → padre</span></td><td>El padre pasa una función (<code>onAnadir={handleAnadir}</code>) y el hijo la invoca: <code>onClick={() =&gt; onAnadir(producto)}</code>. El hijo no modifica datos, solo avisa de lo que ha pasado.</td></tr>
+  <tr><td><strong>Estado elevado</strong></td><td><span class="mo">hermano → hermano</span></td><td><code>ProductoCard</code> y <code>ResumenPedido</code> no se conocen. La tarjeta avisa a <code>Home</code>, que actualiza <code>pedido</code>; React vuelve a pintar <code>ResumenPedido</code> con <code>lineas</code> y <code>total</code> nuevos.</td></tr>
+  <tr><td><strong><code>children</code></strong></td><td><span class="az">padre → hijo</span></td><td><code>SeccionPanel</code> pone el marco (título, icono) y el padre decide qué va dentro. Es composición: el contenedor no conoce su contenido.</td></tr>
+  <tr><td><strong>Estado local + resultado</strong></td><td><span class="ve">hijo → padre</span></td><td><code>FormularioProducto</code> guarda y valida sus campos. Solo cuando son correctos llama a <code>onCrear({nombre, precio, categoria})</code>; el padre genera el <code>id</code> y lo añade a la carta.</td></tr>
+</table>
+<div class="box"><strong>Ejemplo del ciclo completo:</strong> se pulsa «Añadir» en <em>Croissant</em> → <code>ProductoCard</code> llama a <code>onAnadir(croissant)</code> <span class="ve">↑</span> → <code>Home</code> hace <code>setPedido({…prev, p3: 1})</code> → React vuelve a pintar → la tarjeta recibe <code>cantidad=1</code> <span class="az">↓</span> y el resumen recibe <code>lineas</code> y <code>total</code> nuevos <span class="mo">↔</span>. El registro de la app muestra estos pasos con los mismos colores.</div>
+
+<h2>4. Decisiones y alternativas</h2>
+<table>
+  <tr><th>Decisión</th><th>Motivo</th><th>Alternativa descartada</th></tr>
+  <tr><td>Un solo dueño del estado (<code>Home</code>)</td><td>Hay una única fuente de verdad: la insignia y el total no pueden desincronizarse.</td><td>Que cada tarjeta guarde su cantidad: el resumen tendría que preguntarle a cada una.</td></tr>
+  <tr><td>Pedido como diccionario <code>id → cantidad</code></td><td>No duplica los productos; <code>lineas</code> y <code>total</code> se derivan con <code>useMemo</code>.</td><td>Guardar un array de líneas con copias de los productos.</td></tr>
+  <tr><td><code>useCallback</code> en los callbacks</td><td>El hijo recibe la misma función entre renders, así que se puede optimizar con <code>React.memo</code>.</td><td>Funciones nuevas en cada render (funciona, pero obliga a repintar todos los hijos).</td></tr>
+  <tr><td>Formulario con estado propio</td><td>Cada tecla no vuelve a pintar el padre, que solo recibe datos validados.</td><td>Tener los <code>useState</code> del formulario en <code>Home</code>.</td></tr>
+  <tr><td>Props y callbacks, sin estado global</td><td>Con un nivel de profundidad, el flujo queda explícito y cada dato tiene un camino rastreable.</td><td>Context API o Redux: compensan cuando los datos bajan varios niveles (<em>prop drilling</em>).</td></tr>
+</table>
+
+<h2>5. Responsive y verificación</h2>
+<ul>
+  <li><strong>Móvil:</strong> 1 columna, botón flotante (FAB) para crear producto y modal a pantalla completa. <strong>Tablet</strong> (≥ 768 px): carta en 3 columnas y modal centrado. <strong>Escritorio</strong> (≥ 992 px): carta a la izquierda y pedido y registro fijos a la derecha; el FAB se sustituye por un botón.</li>
+  <li>Accesibilidad: botones de al menos 44 px, <code>aria-label</code> en los botones con icono, total y registro con <code>aria-live="polite"</code> y error del formulario con <code>role="alert"</code>.</li>
+</ul>
+<div class="box"><strong>Prueba automatizada en producción</strong> (Playwright + Chrome, 360×800, 820×1180 y 1280×800): sin scroll horizontal y con la <strong>consola limpia</strong>. Añadir 2 cafés y 1 croissant da 4,10 € y la insignia «×2»; quitar uno baja a 2,80 €; el formulario vacío muestra el error de validación; uno válido añade el producto 7.º y cierra el modal; «Vaciar» y «Confirmar» ponen el total a 0,00 €.</div>
+
+<h2>6. Capturas (producción)</h2>
+<div class="shots">
+  <figure><img src="capturas/mobile.png" style="width:130px"><figcaption>Mobile · 360×800</figcaption></figure>
+  <figure><img src="capturas/mobile-modal.png" style="width:130px"><figcaption>Formulario hijo · validación</figcaption></figure>
+  <figure><img src="capturas/tablet.png" style="width:200px"><figcaption>Tablet · 820×1180</figcaption></figure>
+</div>
+<div class="shots" style="margin-top:10px">
+  <figure><img src="capturas/desktop.png" style="width:560px"><figcaption>Desktop · registro de comunicación con los tres tipos de mensaje</figcaption></figure>
+</div>
+
+</body>
+</html>
